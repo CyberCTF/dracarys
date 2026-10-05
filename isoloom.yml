@@ -18,6 +18,7 @@ machines:
       image:
         vagrant: GOAD/WindowsServer2025
         vagrant_version: "2026.02.09"
+        winrm: ssl
       provision: [vagrant/ConfigureRemotingForAnsible.ps1]
 
   srv01:
@@ -30,6 +31,7 @@ machines:
       image:
         vagrant: GOAD/WindowsServer2025
         vagrant_version: "2026.02.09"
+        winrm: ssl
       provision: [vagrant/ConfigureRemotingForAnsible.ps1]
 
   lx01:
