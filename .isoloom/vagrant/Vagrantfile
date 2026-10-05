@@ -16,7 +16,7 @@ end
 
 Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.boot_timeout = 600
+  config.vm.boot_timeout = 900
 
   config.vm.define "dc01" do |m|
     m.vm.box = "GOAD/WindowsServer2025"
@@ -27,8 +27,8 @@ Vagrant.configure("2") do |config|
     m.vm.communicator = "winrm"
     m.winrm.username = "vagrant"
     m.winrm.password = "vagrant"
-    m.winrm.transport = :plaintext
-    m.winrm.basic_auth_only = true
+    m.winrm.transport = :ssl
+    m.winrm.ssl_peer_verification = false
     m.winrm.retry_limit = 30
     m.winrm.retry_delay = 10
     m.vm.network "private_network", ip: "192.168.56.10", netmask: "255.255.255.0", virtualbox__intnet: "isoloom-dracarys-lab", libvirt__network_name: "isoloom-dracarys-lab", libvirt__dhcp_enabled: false
@@ -84,8 +84,8 @@ Vagrant.configure("2") do |config|
     m.vm.communicator = "winrm"
     m.winrm.username = "vagrant"
     m.winrm.password = "vagrant"
-    m.winrm.transport = :plaintext
-    m.winrm.basic_auth_only = true
+    m.winrm.transport = :ssl
+    m.winrm.ssl_peer_verification = false
     m.winrm.retry_limit = 30
     m.winrm.retry_delay = 10
     m.vm.network "private_network", ip: "192.168.56.11", netmask: "255.255.255.0", virtualbox__intnet: "isoloom-dracarys-lab", libvirt__network_name: "isoloom-dracarys-lab", libvirt__dhcp_enabled: false
@@ -231,8 +231,8 @@ Vagrant.configure("2") do |config|
       lx01 ansible_host=192.168.56.12
 
       [windows]
-      dc01 ansible_host=192.168.56.10
-      srv01 ansible_host=192.168.56.11
+      dc01 ansible_host=192.168.56.10 ansible_port=5986 ansible_winrm_scheme=https ansible_winrm_transport=ntlm
+      srv01 ansible_host=192.168.56.11 ansible_port=5986 ansible_winrm_scheme=https ansible_winrm_transport=ntlm
 
       [linux:vars]
       ansible_user=vagrant
@@ -243,9 +243,6 @@ Vagrant.configure("2") do |config|
       ansible_user=vagrant
       ansible_password=vagrant
       ansible_connection=winrm
-      ansible_port=5985
-      ansible_winrm_scheme=http
-      ansible_winrm_transport=basic
       ansible_winrm_server_cert_validation=ignore
       ansible_winrm_operation_timeout_sec=400
       ansible_winrm_read_timeout_sec=500
