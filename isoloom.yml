@@ -7,32 +7,31 @@ name: dracarys
 networks:
   lab: { cidr: 192.168.56.0/24 }
 
-machines:
-  dc01:
-    networks: { lab: 10 }
-    services: [{ port: 53, name: dns }, { port: 88, name: kerberos }, { port: 389, name: ldap }, { port: 445, name: smb }]
-    resources: { cpus: 2, memory_mb: 3000 }
+common:
+  resources: { cpus: 2, memory_mb: 3000 }
+
+# The two Windows boxes share GOAD's Server 2025 image (WinRM over HTTPS) and the WinRM step.
+groups:
+  win2025:
+    members: [dc01, srv01]
     vm:
       os: windows-server-2025
-      # GOAD's own box for this lab.
       image:
         vagrant: GOAD/WindowsServer2025
         vagrant_version: "2026.02.09"
         winrm: ssl
       provision: [vagrant/ConfigureRemotingForAnsible.ps1]
 
+machines:
+  dc01:
+    networks: { lab: 10 }
+    services: [{ port: 53, name: dns }, { port: 88, name: kerberos }, { port: 389, name: ldap }, { port: 445, name: smb }]
+    vm: {}
+
   srv01:
     networks: { lab: 11 }
     services: [{ port: 445, name: smb }]
-    resources: { cpus: 2, memory_mb: 3000 }
-    vm:
-      os: windows-server-2025
-      # GOAD's own box for this lab.
-      image:
-        vagrant: GOAD/WindowsServer2025
-        vagrant_version: "2026.02.09"
-        winrm: ssl
-      provision: [vagrant/ConfigureRemotingForAnsible.ps1]
+    vm: {}
 
   lx01:
     networks: { lab: 12 }
@@ -52,3 +51,7 @@ provision:
       - ad/DRACARYS/providers/isoloom/inventory
       - globalsettings.ini
     requirements: ansible/requirements_311.yml
+
+message: |
+  DRACARYS is up: the domain controller at {{ machines.dc01.addresses.lab }}, the server at
+  {{ machines.srv01.addresses.lab }}, the Linux box at {{ machines.lx01.addresses.lab }}.
