@@ -1,0 +1,16 @@
+{
+  "title": "DRACARYS",
+  "description": "An Active Directory lab on Windows Server 2025: two Windows servers and an Ubuntu member joined to the domain over SSSD, covering modern AD plus a Linux domain member.",
+  "question": "Compromise the domain across the Windows and Linux members.",
+  "category": "NETWORK",
+  "difficulty": 3,
+  "evidence_kind": "SECRET",
+  "providers": [
+    "virtualbox",
+    "vmware_desktop",
+    "parallels",
+    "vmware_esxi",
+    "aws",
+    "azure"
+  ]
+}
