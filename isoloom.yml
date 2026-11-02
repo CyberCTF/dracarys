@@ -5,57 +5,50 @@ version: 1
 name: dracarys
 
 networks:
-  lab: {cidr: 192.168.56.0/24}
+  lab: { cidr: 192.168.56.0/24 }
 
 common:
-  resources: {cpus: 2, memory_mb: 3000}
+  resources: { cpus: 2, memory_mb: 3000 }
 
-# The two Windows boxes share GOAD's Server 2025 image (WinRM over HTTPS) and the WinRM step.
+# The two Windows boxes share GOAD's Server 2025 image (WinRM over HTTPS, pinned in overrides) and
+# the WinRM step.
 groups:
   win2025:
     members: [dc01, srv01]
-    vm:
-      os: windows-server-2025
-      image:
-        vagrant: GOAD/WindowsServer2025
-        vagrant_version: "2026.02.09"
-        winrm: ssl
-      provision: [vagrant/ConfigureRemotingForAnsible.ps1]
+    os: windows-server@2025
+    app:
+      steps: [{ run: vagrant/ConfigureRemotingForAnsible.ps1 }]
 
 machines:
   dc01:
-    networks: {lab: 10}
-    vm: {}
-    ports:
-      dns:
-        port: 53
-      kerberos:
-        port: 88
-      ldap:
-        port: 389
-      smb:
-        port: 445
+    networks: { lab: 10 }
+    ports: { dns: 53, kerberos: 88, ldap: 389, smb: 445 }
 
   srv01:
-    networks: {lab: 11}
-    vm: {}
-    ports:
-      smb:
-        port: 445
+    networks: { lab: 11 }
+    ports: { smb: 445 }
 
   lx01:
-    networks: {lab: 12}
-    resources: {cpus: 2, memory_mb: 2000}
-    vm:
-      os: ubuntu-24.04
-      # GOAD's own box for this lab.
-      image:
-        vagrant: bento/ubuntu-24.04
-        vagrant_version: "202510.26.0"
+    os: ubuntu@24.04
+    networks: { lab: 12 }
+    ports: { ssh: 22 }
+    resources: { cpus: 2, memory_mb: 2000 }
 
-    ports:
-      ssh:
-        port: 22
+overrides:
+  vagrant:
+    machines:
+      dc01:   # GOAD's own Server 2025 box (WinRM over HTTPS)
+        box: GOAD/WindowsServer2025
+        box_version: "2026.02.09"
+        winrm: ssl
+      srv01:
+        box: GOAD/WindowsServer2025
+        box_version: "2026.02.09"
+        winrm: ssl
+      lx01:
+        box: bento/ubuntu-24.04
+        box_version: "202510.26.0"
+
 provision:
   - ansible: ansible/dracarys.yml
     requirements: ansible/requirements_311.yml
